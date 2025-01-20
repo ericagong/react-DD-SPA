@@ -29,9 +29,23 @@ class Router {
   }
 }
 
+// 사용자 데이터 관리 유틸리티
+const UserStorage = {
+  getUser() {
+    const user = localStorage.getItem("user");
+    return user ? JSON.parse(user) : null;
+  },
+  saveUser(userData) {
+    localStorage.setItem("user", JSON.stringify(userData));
+  },
+  clearUser() {
+    localStorage.removeItem("user");
+  },
+};
+
 // 로그인 상태 확인 함수
 const isAuthenticated = () => {
-  return !!(localStorage.getItem("user") !== null);
+  return !!UserStorage.getUser();
 };
 
 // 컴포넌트 렌더링 함수
@@ -51,7 +65,7 @@ const MainPage = () =>
         <ul class="flex justify-around">
           <li><a href="/" class="text-blue-600">홈</a></li>
           <li><a href="/profile" class="text-gray-600">프로필</a></li>
-          <li><a href="#" class="text-gray-600">로그아웃</a></li>
+          <li><button id="logout" class="text-gray-600">로그아웃<button></li>
         </ul>
       </nav>
 
@@ -171,17 +185,20 @@ const ErrorPage = () =>
 `),
   );
 
-const LoginPage = () =>
+const LoginPage = () => {
   updateDOM(`
   <main class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h1 class="text-2xl font-bold text-center text-blue-600 mb-8">항해플러스</h1>
-      <form>
+      <form id="login-form">
         <div class="mb-4">
-          <input type="text" placeholder="이메일 또는 전화번호" class="w-full p-2 border rounded">
+          <input type="text" id="username" placeholder="사용자 이름" class="w-full p-2 border rounded">
         </div>
-        <div class="mb-6">
-          <input type="password" placeholder="비밀번호" class="w-full p-2 border rounded">
+        <div class="mb-4">
+          <input type="text" id="email" placeholder="이메일(선택)" class="w-full p-2 border rounded">
+        </div>
+        <div class="mb-4">
+          <input type="text" id="bio" placeholder="자기소개(선택)" class="w-full p-2 border rounded">
         </div>
         <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded font-bold">로그인</button>
       </form>
@@ -195,6 +212,7 @@ const LoginPage = () =>
     </div>
   </main>
 `);
+};
 
 const ProfilePage = () => {
   if (!isAuthenticated()) {
@@ -315,3 +333,22 @@ const hijackGlobalEventListeners = () => {
 
 initializeRouter();
 hijackGlobalEventListeners();
+
+document.addEventListener("submit", (e) => {
+  if (e.target && e.target.id === "login-form") {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    if (username) {
+      UserStorage.saveUser({ username, email: "", bio: "" });
+      router.navigateTo("/");
+    }
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "logout") {
+    UserStorage.clearUser();
+    router.navigateTo("/login");
+  }
+});
