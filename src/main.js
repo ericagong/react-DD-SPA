@@ -1,4 +1,41 @@
-const MainPage = () => `
+// SPA 라우터 구현
+class Router {
+  constructor() {
+    this.routes = {};
+    // 브라우저 뒤로가기, 앞으로가기 이벤트 하이재킹
+    window.addEventListener("popstate", this.handlePopState.bind(this));
+  }
+
+  handlePopState() {
+    this.handleRoute(window.location.pathname);
+  }
+
+  handleRoute(path) {
+    const handler = this.routes[path] || this.routes["/404"];
+    handler();
+  }
+
+  addRoute(path, handler) {
+    this.routes[path] = handler;
+  }
+
+  navigateTo(path) {
+    if (!this.routes[path]) {
+      path = "/404";
+    }
+    history.pushState(null, "", path);
+    this.handleRoute(path);
+  }
+}
+
+// 로그인 상태 확인 함수
+const isAuthenticated = () => {
+  return !!(localStorage.getItem("user") !== null);
+};
+
+// 컴포넌트 렌더링 함수
+const MainPage = () => {
+  document.getElementById("root").innerHTML = `
   <div class="bg-gray-100 min-h-screen flex justify-center">
     <div class="max-w-md w-full">
       <header class="bg-blue-600 text-white p-4 sticky top-0">
@@ -109,8 +146,10 @@ const MainPage = () => `
     </div>
   </div>
 `;
+};
 
-const ErrorPage = () => `
+const ErrorPage = () => {
+  document.getElementById("root").innerHTML = `
   <main class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-md w-full text-center" style="max-width: 480px">
       <h1 class="text-2xl font-bold text-blue-600 mb-4">항해플러스</h1>
@@ -125,8 +164,10 @@ const ErrorPage = () => `
     </div>
   </main>
 `;
+};
 
-const LoginPage = () => `
+const LoginPage = () => {
+  document.getElementById("root").innerHTML = `
   <main class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h1 class="text-2xl font-bold text-center text-blue-600 mb-8">항해플러스</h1>
@@ -149,8 +190,14 @@ const LoginPage = () => `
     </div>
   </main>
 `;
+};
 
-const ProfilePage = () => `
+const ProfilePage = () => {
+  if (!isAuthenticated()) {
+    router.navigateTo("/login");
+    return;
+  }
+  document.getElementById("root").innerHTML = `
   <div id="root">
     <div class="bg-gray-100 min-h-screen flex justify-center">
       <div class="max-w-md w-full">
@@ -232,10 +279,25 @@ const ProfilePage = () => `
     </div>
   </div>
 `;
+};
 
-document.body.innerHTML = `
-  ${MainPage()}
-  ${ProfilePage()}
-  ${LoginPage()}
-  ${ErrorPage()}
-`;
+// 라우터 객체 생성 및 라우터 추가
+const router = new Router();
+router.addRoute("/", MainPage);
+router.addRoute("/404", ErrorPage);
+router.addRoute("/login", LoginPage);
+router.addRoute("/profile", ProfilePage);
+
+// 초기 렌더링 이벤트 하이재킹
+document.addEventListener("DOMContentLoaded", () => {
+  router.handleRoute(window.location.pathname);
+});
+
+// a 태그 클릭 이벤트 하이재킹
+document.addEventListener("click", (e) => {
+  if (e.target.tagName === "A") {
+    e.preventDefault();
+    const path = e.target.getAttribute("href");
+    router.navigateTo(path);
+  }
+});
