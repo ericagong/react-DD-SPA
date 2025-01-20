@@ -331,24 +331,32 @@ const hijackGlobalEventListeners = () => {
   });
 };
 
-initializeRouter();
-hijackGlobalEventListeners();
+// 이벤트 리스너 초기화
+const initializeEventListeners = () => {
+  // 로그인 form submit 이벤트
+  document.addEventListener("submit", (e) => {
+    if (e.target && e.target.id === "login-form") {
+      e.preventDefault();
 
-document.addEventListener("submit", (e) => {
-  if (e.target && e.target.id === "login-form") {
-    e.preventDefault();
-
-    const username = document.getElementById("username").value.trim();
-    if (username) {
-      UserStorage.saveUser({ username, email: "", bio: "" });
-      router.navigateTo("/");
+      const username = document.getElementById("username").value.trim();
+      if (username) {
+        UserStorage.saveUser({ username, email: "", bio: "" });
+        router.navigateTo("/");
+      }
     }
-  }
-});
+  });
 
-document.addEventListener("click", (e) => {
-  if (e.target && e.target.id === "logout") {
-    UserStorage.clearUser();
-    router.navigateTo("/login");
-  }
-});
+  // 로그아웃 버튼 클릭 이벤트
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "logout") {
+      UserStorage.clearUser();
+      router.navigateTo("/login");
+    }
+  });
+
+  // SPA 처리 위한 이벤트 hijacking
+  hijackGlobalEventListeners();
+};
+
+initializeRouter();
+initializeEventListeners();
