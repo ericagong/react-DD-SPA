@@ -2,7 +2,8 @@
 class Router {
   constructor() {
     this.routes = {};
-    // 브라우저 뒤로가기, 앞으로가기 이벤트 하이재킹
+    // router event listener 하이재킹
+    // 브라우저 뒤로가기, 앞으로가기 이벤트
     window.addEventListener("popstate", this.handlePopState.bind(this));
   }
 
@@ -34,8 +35,12 @@ const isAuthenticated = () => {
 };
 
 // 컴포넌트 렌더링 함수
-const MainPage = () => {
-  document.getElementById("root").innerHTML = `
+const updateDOM = (html) => {
+  document.getElementById("root").innerHTML = html;
+};
+
+const MainPage = () =>
+  updateDOM(`
   <div class="bg-gray-100 min-h-screen flex justify-center">
     <div class="max-w-md w-full">
       <header class="bg-blue-600 text-white p-4 sticky top-0">
@@ -145,11 +150,11 @@ const MainPage = () => {
       </footer>
     </div>
   </div>
-`;
-};
+`);
 
-const ErrorPage = () => {
-  document.getElementById("root").innerHTML = `
+const ErrorPage = () =>
+  updateDOM(
+    (document.getElementById("root").innerHTML = `
   <main class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-md w-full text-center" style="max-width: 480px">
       <h1 class="text-2xl font-bold text-blue-600 mb-4">항해플러스</h1>
@@ -163,11 +168,11 @@ const ErrorPage = () => {
       </a>
     </div>
   </main>
-`;
-};
+`),
+  );
 
-const LoginPage = () => {
-  document.getElementById("root").innerHTML = `
+const LoginPage = () =>
+  updateDOM(`
   <main class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h1 class="text-2xl font-bold text-center text-blue-600 mb-8">항해플러스</h1>
@@ -189,15 +194,14 @@ const LoginPage = () => {
       </div>
     </div>
   </main>
-`;
-};
+`);
 
 const ProfilePage = () => {
   if (!isAuthenticated()) {
     router.navigateTo("/login");
     return;
   }
-  document.getElementById("root").innerHTML = `
+  return updateDOM(`
   <div id="root">
     <div class="bg-gray-100 min-h-screen flex justify-center">
       <div class="max-w-md w-full">
@@ -278,26 +282,36 @@ const ProfilePage = () => {
       </div>
     </div>
   </div>
-`;
+`);
 };
 
-// 라우터 객체 생성 및 라우터 추가
+// 라우터 객체 생성
 const router = new Router();
-router.addRoute("/", MainPage);
-router.addRoute("/404", ErrorPage);
-router.addRoute("/login", LoginPage);
-router.addRoute("/profile", ProfilePage);
 
-// 초기 렌더링 이벤트 하이재킹
-document.addEventListener("DOMContentLoaded", () => {
-  router.handleRoute(window.location.pathname);
-});
+// 라우터 초기화
+const initializeRouter = () => {
+  router.addRoute("/", MainPage);
+  router.addRoute("/404", ErrorPage);
+  router.addRoute("/login", LoginPage);
+  router.addRoute("/profile", ProfilePage);
+};
 
-// a 태그 클릭 이벤트 하이재킹
-document.addEventListener("click", (e) => {
-  if (e.target.tagName === "A") {
-    e.preventDefault();
-    const path = e.target.getAttribute("href");
-    router.navigateTo(path);
-  }
-});
+// 이벤트 하이재킹
+const hijackGlobalEventListeners = () => {
+  // 초기 렌더링 이벤트
+  document.addEventListener("DOMContentLoaded", () => {
+    router.handleRoute(window.location.pathname);
+  });
+
+  // a 태그 클릭 이벤트
+  document.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") {
+      e.preventDefault();
+      const path = e.target.getAttribute("href");
+      router.navigateTo(path);
+    }
+  });
+};
+
+initializeRouter();
+hijackGlobalEventListeners();
