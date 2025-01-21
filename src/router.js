@@ -8,7 +8,7 @@ class Router {
     this.routes[path] = handler;
   }
 
-  handleRoute(path) {
+  #handleRoute(path) {
     const handler = this.routes[path] || this.routes["/404"];
     handler();
   }
@@ -19,7 +19,7 @@ class Router {
     }
     // SPA 핵심 로직
     history.pushState(null, "", path);
-    this.handleRoute(path);
+    this.#handleRoute(path);
   }
 
   initializeRoutes(routesConfig) {
@@ -29,12 +29,12 @@ class Router {
   #bindSPAEventHandlers() {
     // 초기 렌더링 경로 처리
     document.addEventListener("DOMContentLoaded", () => {
-      this.handleRoute(window.location.pathname);
+      this.#handleRoute(window.location.pathname);
     });
 
     // 브라우저 뒤로가기/앞으로가기 처리
     window.addEventListener("popstate", () => {
-      this.handleRoute(window.location.pathname);
+      this.#handleRoute(window.location.pathname);
     });
 
     // 앵커 태그 클릭 이벤트 하이재킹
