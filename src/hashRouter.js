@@ -1,5 +1,5 @@
-// SPA 라우터 구현
-class Router {
+// HashRouter 구현
+class HashRouter {
   constructor() {
     this.routes = {};
   }
@@ -17,24 +17,29 @@ class Router {
     if (!this.routes[path]) {
       path = "/404";
     }
-    // SPA 핵심 로직
-    history.pushState(null, "", path);
-    this.#handleRoute(path);
+    // Hash 기반 경로 업데이트
+    window.location.hash = path;
   }
 
   initializeRoutes(routesConfig) {
     routesConfig.forEach(({ path, handler }) => this.addRoute(path, handler));
   }
 
+  #getPath() {
+    return window.location.hash.slice(1) || "/";
+  }
+
   #bindSPAEventHandlers() {
     // 초기 렌더링 경로 처리
     document.addEventListener("DOMContentLoaded", () => {
-      this.#handleRoute(window.location.pathname);
+      const path = this.#getPath();
+      this.#handleRoute(path);
     });
 
-    // 브라우저 뒤로가기/앞으로가기 처리
-    window.addEventListener("popstate", () => {
-      this.#handleRoute(window.location.pathname);
+    // 해시 변경 이벤트 처리
+    window.addEventListener("hashchange", () => {
+      const path = this.#getPath();
+      this.#handleRoute(path);
     });
 
     // 앵커 태그 클릭 이벤트 하이재킹
@@ -52,6 +57,6 @@ class Router {
   }
 }
 
-// Router 인스턴스 생성
-const router = new Router();
-export default router;
+// HashRouter 인스턴스 생성
+const hashRouter = new HashRouter();
+export default hashRouter;
