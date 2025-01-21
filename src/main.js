@@ -15,7 +15,7 @@ const initializeRouter = () => {
     { path: "/404", handler: () => new NotFound($rootEl) },
   ];
 
-  routesConfig.forEach(({ path, handler }) => router.addRoute(path, handler));
+  router.initializeRoutes(routesConfig);
 };
 
 // 앱 초기화

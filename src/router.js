@@ -4,7 +4,7 @@ class Router {
     this.routes = {};
   }
 
-  addRoute(path, handler) {
+  #addRoute(path, handler) {
     this.routes[path] = handler;
   }
 
@@ -13,8 +13,12 @@ class Router {
     handler();
   }
 
+  hasRoute(path) {
+    return !!this.routes[path];
+  }
+
   navigateTo(path) {
-    if (!this.routes[path]) {
+    if (!this.hasRoute(path)) {
       path = "/404";
     }
     // SPA 핵심 로직
@@ -23,7 +27,7 @@ class Router {
   }
 
   initializeRoutes(routesConfig) {
-    routesConfig.forEach(({ path, handler }) => this.addRoute(path, handler));
+    routesConfig.forEach(({ path, handler }) => this.#addRoute(path, handler));
   }
 
   #bindSPAEventHandlers() {

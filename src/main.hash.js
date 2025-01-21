@@ -19,15 +19,7 @@ const initializeRouter = () => {
     },
     {
       path: "/profile",
-      handler: () => {
-        const user = localStorage.getItem("user");
-        if (!user) {
-          // 로그인되지 않은 경우, 로그인 페이지로 리다이렉트
-          hashRouter.navigateTo("/login");
-          return;
-        }
-        new Profile($rootEl);
-      },
+      handler: () => new Profile($rootEl),
     },
     {
       path: "/404",
@@ -35,9 +27,7 @@ const initializeRouter = () => {
     },
   ];
 
-  routesConfig.forEach(({ path, handler }) =>
-    hashRouter.addRoute(path, handler),
-  );
+  hashRouter.initializeRoutes(routesConfig);
 };
 
 // 앱 초기화
